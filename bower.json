@@ -4,7 +4,7 @@
   "main": "masonry.js",
   "dependencies": {
     "get-size": "~2.0.2",
-    "outlayer": "~2.0.0"
+    "outlayer": "https://github.com/FASTEC/outlayer.git#^2.0.1"
   },
   "devDependencies": {
     "jquery-bridget": "~2.0.0",
