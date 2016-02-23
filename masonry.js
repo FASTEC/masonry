@@ -78,7 +78,11 @@
     // if overshoot is less than a pixel, round up, otherwise floor it
     var mathMethod = excess && excess < 1 ? 'round' : 'floor';
     cols = Math[ mathMethod ]( cols );
-    this.cols = Math.max( cols, 1 );
+    
+    this.cols = Math.max( cols, 1 );    
+    if (this._getOption('fitWidthContent')) {
+      this.columnWidth += containerWidth % columnWidth / this.cols;
+    }
   };
 
   Masonry.prototype.getContainerWidth = function() {
@@ -91,13 +95,15 @@
     this.containerWidth = size && size.innerWidth;
   };
 
-  Masonry.prototype._getItemLayoutPosition = function( item ) {
+  Masonry.prototype._getItemLayout = function( item ) {
     item.getSize();
+   var isFitWidthContent = this._getOption('fitWidthContent');
+    var itemOuterWidth = isFitWidthContent ? this.columnWidth : item.size.outerWidth;
     // how many columns does this brick span
-    var remainder = item.size.outerWidth % this.columnWidth;
+    var remainder = itemOuterWidth % this.columnWidth;
     var mathMethod = remainder && remainder < 1 ? 'round' : 'ceil';
     // round if off by 1 pixel, otherwise use ceil
-    var colSpan = Math[ mathMethod ]( item.size.outerWidth / this.columnWidth );
+    var colSpan = Math[ mathMethod ]( itemOuterWidth / this.columnWidth );
     colSpan = Math.min( colSpan, this.cols );
 
     var colGroup = this._getColGroup( colSpan );
@@ -106,9 +112,11 @@
     var shortColIndex = colGroup.indexOf( minimumY );
 
     // position the brick
-    var position = {
+    var layout = {
       x: this.columnWidth * shortColIndex,
-      y: minimumY
+      y: minimumY,
+      width: itemOuterWidth - this.gutter,
+      height: 'auto'
     };
 
     // apply setHeight to necessary columns
@@ -117,8 +125,12 @@
     for ( var i = 0; i < setSpan; i++ ) {
       this.colYs[ shortColIndex + i ] = setHeight;
     }
+    
+    // if(this._getOption('fitWidthContent')) {
+    //     $(item.element).css('width', itemOuterWidth - this.gutter)
+    // }
 
-    return position;
+    return layout;
   };
 
   /**
